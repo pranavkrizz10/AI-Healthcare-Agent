@@ -21,7 +21,7 @@ st.set_page_config(
 )
 
 # ── Paths ──────────────────────────────────────────────────────────────────────
-MODEL_PATH   = os.path.join("models", "disease_classifier.pkl")
+MODEL_PATH = os.path.join("models", "disease_classifier.pkl")
 SYMPTOM_PATH = os.path.join("models", "symptom_list.json")
 
 # ── Advice database ────────────────────────────────────────────────────────────
@@ -70,23 +70,39 @@ def load_extractor():
 st.markdown("""
 <style>
     .stApp { max-width: 720px; margin: auto; }
+
     .result-box {
-        background: #f0f9f4; border-left: 4px solid #2e8b57;
-        padding: 1rem 1.25rem; border-radius: 6px; margin-top: 1rem;
+        background: #1e2a2f;
+        border-left: 4px solid #2e8b57;
+        padding: 1rem 1.25rem;
+        border-radius: 6px;
+        margin-top: 1rem;
+        color: #ffffff;
     }
+
     .warning-box {
-        background: #fff4e5; border-left: 4px solid #e07b00;
-        padding: 1rem 1.25rem; border-radius: 6px; margin-top: 0.5rem;
+        background: #3a2d1f;
+        border-left: 4px solid #e07b00;
+        padding: 1rem 1.25rem;
+        border-radius: 6px;
+        margin-top: 0.5rem;
+        color: #ffffff;
     }
+
     .red-flag-box {
-        background: #fdecea; border-left: 4px solid #c0392b;
-        padding: 1rem 1.25rem; border-radius: 6px; margin-top: 0.5rem;
+        background: #3a1f1f;
+        border-left: 4px solid #c0392b;
+        padding: 1rem 1.25rem;
+        border-radius: 6px;
+        margin-top: 0.5rem;
+        color: #ffffff;
     }
 </style>
 """, unsafe_allow_html=True)
 
 st.title("🩺 AI Health Assistant")
-st.caption("Describe your symptoms in plain English and get an instant preliminary assessment.")
+st.caption(
+    "Describe your symptoms in plain English and get an instant preliminary assessment.")
 st.warning(
     "⚠️ **Disclaimer:** This tool is for informational purposes only and does **not** replace "
     "professional medical advice. Always consult a qualified healthcare provider.",
@@ -102,18 +118,20 @@ user_input = st.text_area(
     height=120,
 )
 
-analyse_btn = st.button("🔍 Analyse Symptoms", type="primary", use_container_width=True)
+analyse_btn = st.button("🔍 Analyse Symptoms",
+                        type="primary", use_container_width=True)
 
 # ── Analysis ───────────────────────────────────────────────────────────────────
 if analyse_btn:
     if not user_input.strip():
         st.error("Please enter your symptoms before analysing.")
     else:
-        bundle    = load_model()
+        bundle = load_model()
         extractor = load_extractor()
 
         if extractor is None:
-            st.error("Symptom extractor could not be loaded. Check that the models/ folder exists.")
+            st.error(
+                "Symptom extractor could not be loaded. Check that the models/ folder exists.")
             st.stop()
 
         # NLP extraction
@@ -136,7 +154,8 @@ if analyse_btn:
                 " ".join(f"`{s}`" for s in found_symptoms)
             )
         else:
-            st.info("No specific symptoms could be matched. Try rephrasing your description.")
+            st.info(
+                "No specific symptoms could be matched. Try rephrasing your description.")
             st.stop()
 
         # ── Prediction ────────────────────────────────────────────────────────
@@ -148,8 +167,8 @@ if analyse_btn:
                 unsafe_allow_html=True
             )
         else:
-            model        = bundle["model"]
-            le           = bundle["label_encoder"]
+            model = bundle["model"]
+            le = bundle["label_encoder"]
             feature_cols = bundle["feature_cols"]
 
             # Align vector to model's feature columns
@@ -159,22 +178,22 @@ if analyse_btn:
                 for col in feature_cols
             ], dtype=np.float32).reshape(1, -1)
 
-            pred_idx  = model.predict(feat_vec)[0]
-            disease   = le.inverse_transform([pred_idx])[0].title()
+            pred_idx = model.predict(feat_vec)[0]
+            disease = le.inverse_transform([pred_idx])[0].title()
 
             # ── Confidence & top-3 ────────────────────────────────────────────
             # Minimum symptom count guard: fewer than 3 symptoms = too ambiguous
-            MIN_SYMPTOMS    = 3
-            CONF_THRESHOLD  = 35   # below this % = uncertain prediction
+            MIN_SYMPTOMS = 3
+            CONF_THRESHOLD = 35   # below this % = uncertain prediction
 
             if hasattr(model, "predict_proba"):
-                proba        = model.predict_proba(feat_vec)[0]
-                confidence   = float(proba[pred_idx]) * 100
-                top_n        = np.argsort(proba)[::-1][:3]
+                proba = model.predict_proba(feat_vec)[0]
+                confidence = float(proba[pred_idx]) * 100
+                top_n = np.argsort(proba)[::-1][:3]
                 top_diseases = [(le.inverse_transform([i])[0].title(), proba[i]*100)
                                 for i in top_n]
             else:
-                confidence   = None
+                confidence = None
                 top_diseases = [(disease, None)]
 
             st.subheader("Predicted Condition")
@@ -204,8 +223,8 @@ if analyse_btn:
                 # Still show top-3 as possibilities, not a diagnosis
                 with st.expander("🔍 Possible conditions (not a diagnosis)"):
                     for d, p in top_diseases:
-                        bar_val = (p / 100) if p else 0
-                        st.write(f"**{d}** — {p:.1f}%")
+                        bar_val = float(p) / 100 if p is not None else 0.0
+                        st.write(f"**{d}** — {float(p):.1f}%")
                         st.progress(bar_val)
 
             # ── Normal result ─────────────────────────────────────────────────
@@ -222,8 +241,8 @@ if analyse_btn:
                 if len(top_diseases) > 1:
                     with st.expander("View top-3 differential diagnoses"):
                         for d, p in top_diseases:
-                            bar_val = (p / 100) if p else 0
-                            st.write(f"**{d}** — {p:.1f}%")
+                            bar_val = float(p) / 100 if p is not None else 0.0
+                            st.write(f"**{d}** — {float(p):.1f}%")
                             st.progress(bar_val)
 
                 # Advice
@@ -234,4 +253,4 @@ if analyse_btn:
                 )
 
 st.divider()
-st.caption("Built with Python · scikit-learn · spaCy · Streamlit")
+st.caption("Built with Python · Deep Neural Network (MLP) · spaCy · Streamlit")
