@@ -1,0 +1,4 @@
+__pycache__/
+*.log
+test_out.txt
+utf8_out.txt

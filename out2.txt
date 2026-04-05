@@ -1,0 +1,46 @@
+﻿git : remote: error: 
+Trace: caf9982ddb85d67f8502
+1c734a91ddc35e7bf3456cb4b92
+ddda7c6ae1439b0f6        
+At line:1 char:1
++ git push -u origin main 
+> out.txt 2>&1 ; cat 
+out.txt
++ ~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
+    + CategoryInfo         
+     : NotSpecified: (rem  
+  ote: error: ...439b0f6   
+         :String) [], R    
+emoteException
+    + FullyQualifiedErrorI 
+   d : NativeCommandError
+ 
+remote: error: See 
+https://gh.io/lfs for more 
+information.        
+remote: error: File 
+data/raw_sympt.csv is 
+181.95 MB; this exceeds 
+GitHub's file size limit 
+of 100.00 MB        
+remote: error: File 
+data/processed_data.csv is 
+158.87 MB; this exceeds 
+GitHub's file size limit 
+of 100.00 MB        
+remote: error: GH001: 
+Large files detected. You 
+may want to try Git Large 
+File Storage - https://git-
+lfs.github.com.        
+To https://github.com/prana
+vkrizz10/AI-Healthcare-Agen
+t.git
+ ! [remote rejected] main 
+-> main (pre-receive hook 
+declined)
+error: failed to push some 
+refs to 'https://github.com
+/pranavkrizz10/AI-Healthcar
+e-Agent.git'
